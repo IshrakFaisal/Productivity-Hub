@@ -54,8 +54,8 @@ export function ToolDirectory() {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-      <aside className="h-fit rounded-lg border border-white/10 bg-white/[0.055] p-4 lg:sticky lg:top-24">
+    <div className="grid gap-6 lg:grid-cols-[292px_1fr]">
+      <aside className="h-fit rounded-lg border border-white/10 bg-white/[0.04] p-4 shadow-[0_18px_55px_rgba(0,0,0,0.22)] backdrop-blur-xl lg:sticky lg:top-24">
         <div className="flex items-center gap-2 text-sm font-semibold text-white">
           <SlidersHorizontal className="h-4 w-4" />
           Refine directory
@@ -67,7 +67,7 @@ export function ToolDirectory() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search tools"
-              className="h-11 w-full rounded-md border border-white/10 bg-black/30 pl-10 pr-3 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-lime-200/50 focus:ring-4 focus:ring-lime-200/10"
+              className="h-11 w-full rounded-md border border-white/10 bg-black/35 pl-10 pr-3 text-sm text-white outline-none transition placeholder:text-neutral-500 focus:border-lime-200/50 focus:ring-4 focus:ring-lime-200/10"
             />
           </label>
           {[
@@ -80,7 +80,7 @@ export function ToolDirectory() {
               <select
                 value={value as string}
                 onChange={(event) => (setter as (value: string) => void)(event.target.value)}
-                className="mt-2 h-10 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none focus:border-lime-200/50"
+                className="mt-2 h-10 w-full rounded-md border border-white/10 bg-black/35 px-3 text-sm text-white outline-none focus:border-lime-200/50"
               >
                 {(options as string[]).map((option) => (
                   <option key={option}>{option}</option>
@@ -101,8 +101,8 @@ export function ToolDirectory() {
                   className={cn(
                     "rounded-md border px-3 py-2 text-left text-sm font-medium transition",
                     active.includes(filter.id)
-                      ? "border-lime-200/40 bg-lime-200/15 text-lime-100"
-                      : "border-white/10 bg-white/[0.04] text-neutral-300 hover:bg-white/[0.08]",
+                      ? "border-lime-200/35 bg-lime-200/[0.12] text-lime-100"
+                      : "border-white/10 bg-white/[0.035] text-neutral-300 hover:border-white/18 hover:bg-white/[0.07]",
                   )}
                 >
                   {filter.label}
@@ -115,7 +115,7 @@ export function ToolDirectory() {
             <select
               value={sort}
               onChange={(event) => setSort(event.target.value as SortKey)}
-              className="mt-2 h-10 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none focus:border-lime-200/50"
+              className="mt-2 h-10 w-full rounded-md border border-white/10 bg-black/35 px-3 text-sm text-white outline-none focus:border-lime-200/50"
             >
               {sorters.map((item) => (
                 <option key={item.id} value={item.id}>
@@ -143,7 +143,7 @@ export function ToolDirectory() {
         </div>
       </aside>
       <section>
-        <div className="mb-4 flex items-center justify-between gap-4">
+        <div className="mb-4 flex items-center justify-between gap-4 rounded-lg border border-white/10 bg-white/[0.035] px-4 py-3">
           <p className="text-sm text-neutral-400">
             Showing <span className="font-semibold text-white">{tools.length}</span> tools
           </p>

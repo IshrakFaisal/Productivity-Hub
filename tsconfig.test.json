@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "allowJs": false,
+    "incremental": false,
+    "isolatedModules": false,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noEmit": false,
+    "outDir": ".test-build",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "types": ["node"]
+  },
+  "include": [
+    "src/data/productivityTools.ts",
+    "src/lib/quizRecommendation.ts",
+    "src/lib/stackAnalysis.ts",
+    "src/lib/productivityStoreCore.ts",
+    "tests/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

@@ -1,12 +1,14 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Gauge, LockKeyhole, MoveRight, ShieldCheck, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ScoreBar } from "@/components/ScoreBar";
 import { ToolCard } from "@/components/ToolCard";
 import { ToolLogo } from "@/components/ToolLogo";
+import { ToolViewTracker } from "@/components/ToolViewTracker";
 import { getAlternatives, getMainAppVerdict, getToolById, productivityTools } from "@/data/productivityTools";
 
 export function generateStaticParams() {
@@ -21,6 +23,7 @@ export default async function ToolDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <ToolViewTracker toolId={tool.id} />
       <Link href="/tools" className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-neutral-400 hover:text-white">
         <ArrowLeft className="h-4 w-4" />
         Back to directory
@@ -99,6 +102,35 @@ export default async function ToolDetailPage({ params }: { params: Promise<{ id:
       <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr]">
         <Card>
           <CardHeader>
+            <h2 className="font-semibold text-white">Decision factors</h2>
+            <p className="text-sm leading-6 text-neutral-400">Practical buying signals beyond the feature checklist.</p>
+          </CardHeader>
+          <CardContent className="grid gap-3 sm:grid-cols-2">
+            <Factor icon={<Gauge className="h-4 w-4" />} label="Setup difficulty" value={tool.setupDifficulty} />
+            <Factor icon={<MoveRight className="h-4 w-4" />} label="Learning curve" value={tool.learningCurve} />
+            <Factor icon={<LockKeyhole className="h-4 w-4" />} label="Lock-in risk" value={tool.lockInRisk} />
+            <Factor icon={<ShieldCheck className="h-4 w-4" />} label="Migration" value={tool.migrationDifficulty} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <h2 className="font-semibold text-white">Data and privacy notes</h2>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm leading-6 text-neutral-300">
+            <p><span className="font-semibold text-white">Data ownership:</span> {tool.dataOwnership}</p>
+            <p><span className="font-semibold text-white">Privacy posture:</span> {tool.privacyNotes}</p>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mt-6 grid gap-6 lg:grid-cols-2">
+        <Info title={`Choose ${tool.name} if`} items={tool.chooseIf} />
+        <Info title={`Avoid ${tool.name} if`} items={tool.avoidIf} />
+      </section>
+
+      <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr]">
+        <Card>
+          <CardHeader>
             <h2 className="font-semibold text-white">Suggested pairings</h2>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
@@ -134,6 +166,18 @@ export default async function ToolDetailPage({ params }: { params: Promise<{ id:
           ))}
         </div>
       </section>
+    </div>
+  );
+}
+
+function Factor({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
+      <div className="flex items-center gap-2 text-sm text-neutral-400">
+        <span className="text-lime-200">{icon}</span>
+        {label}
+      </div>
+      <p className="mt-2 text-lg font-semibold text-white">{value}</p>
     </div>
   );
 }

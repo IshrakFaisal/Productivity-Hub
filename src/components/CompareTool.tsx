@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { GitCompare, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Download, GitCompare, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ToolLogo } from "@/components/ToolLogo";
 import { productivityTools, type ProductivityTool } from "@/data/productivityTools";
+import { downloadTextFile } from "@/lib/productivityStore";
 
 const scoreRows: { key: keyof Pick<ProductivityTool, "simplicityScore" | "powerScore" | "taskScore" | "notesScore" | "calendarScore" | "collaborationScore" | "integrationsScore" | "knowledgeScore" | "mainAppScore">; label: string }[] = [
   { key: "simplicityScore", label: "Ease of use" },
@@ -24,12 +26,45 @@ export function CompareTool() {
   const selectedTools = useMemo(() => productivityTools.filter((tool) => selectedIds.includes(tool.id)), [selectedIds]);
   const availableTools = productivityTools.filter((tool) => !selectedIds.includes(tool.id));
 
+  useEffect(() => {
+    const ids = new URLSearchParams(window.location.search)
+      .get("apps")
+      ?.split(",")
+      .map((id) => id.trim())
+      .filter((id) => productivityTools.some((tool) => tool.id === id));
+
+    if (!ids?.length) return;
+
+    if (ids.length === 1) {
+      const fallback = ids[0] === "notion" ? "todoist" : "notion";
+      queueMicrotask(() => setSelectedIds([ids[0], fallback]));
+      return;
+    }
+
+    queueMicrotask(() => setSelectedIds(Array.from(new Set(ids)).slice(0, 4)));
+  }, []);
+
   function addTool(id: string) {
     if (selectedIds.length < 4) setSelectedIds((current) => [...current, id]);
   }
 
   function removeTool(id: string) {
     if (selectedIds.length > 2) setSelectedIds((current) => current.filter((item) => item !== id));
+  }
+
+  function exportComparison() {
+    const rows = [
+      ["Field", ...selectedTools.map((tool) => tool.name)],
+      ...scoreRows.map((row) => [row.label, ...selectedTools.map((tool) => `${tool[row.key]}/10`)]),
+      ["AI features", ...selectedTools.map((tool) => (tool.hasAI ? "Built in" : "Not native"))],
+      ["Offline support", ...selectedTools.map((tool) => (tool.worksOffline ? "Good" : "Limited"))],
+      ["Pricing", ...selectedTools.map((tool) => tool.pricing)],
+      ["Best use case", ...selectedTools.map((tool) => tool.bestFor.slice(0, 3).join(" | "))],
+      ["Verdict", ...selectedTools.map((tool) => (tool.mainAppScore >= 8 ? "Home base candidate" : tool.mainAppScore >= 6 ? "Strong specialist" : "Support app"))],
+    ];
+
+    const csv = rows.map((row) => row.map((cell) => `"${cell.replaceAll('"', '""')}"`).join(",")).join("\n");
+    downloadTextFile(`productivity-comparison-${new Date().toISOString().slice(0, 10)}.csv`, csv, "text/csv");
   }
 
   return (
@@ -46,21 +81,27 @@ export function CompareTool() {
                 Scan scores, feature coverage, pricing, and the plain-English verdict for each possible home base.
               </p>
             </div>
-            <select
-              value=""
-              onChange={(event) => {
-                if (event.target.value) addTool(event.target.value);
-              }}
-              disabled={selectedIds.length >= 4}
-              className="h-10 rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none focus:border-lime-200/50 disabled:opacity-50"
-            >
-              <option value="">{selectedIds.length >= 4 ? "Maximum 4 selected" : "Add an app"}</option>
-              {availableTools.map((tool) => (
-                <option key={tool.id} value={tool.id}>
-                  {tool.name}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <select
+                value=""
+                onChange={(event) => {
+                  if (event.target.value) addTool(event.target.value);
+                }}
+                disabled={selectedIds.length >= 4}
+                className="h-10 rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none focus:border-lime-200/50 disabled:opacity-50"
+              >
+                <option value="">{selectedIds.length >= 4 ? "Maximum 4 selected" : "Add an app"}</option>
+                {availableTools.map((tool) => (
+                  <option key={tool.id} value={tool.id}>
+                    {tool.name}
+                  </option>
+                ))}
+              </select>
+              <Button type="button" variant="secondary" onClick={exportComparison}>
+                <Download className="h-4 w-4" />
+                Export CSV
+              </Button>
+            </div>
           </div>
         </CardHeader>
       </Card>

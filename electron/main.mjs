@@ -1,15 +1,25 @@
-import { app, BrowserWindow, protocol, shell } from "electron";
+import { app, BrowserWindow, ipcMain, protocol, shell } from "electron";
+import electronUpdater from "electron-updater";
 import { spawn } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+const { autoUpdater } = electronUpdater;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.join(__dirname, "..");
 const staticRoot = path.join(projectRoot, "out");
 const devUrl = "http://127.0.0.1:3000";
 const appOrigin = "productivity-hub://app";
+const releasePageUrl = "https://github.com/IshrakFaisal/Productivity-Hub/releases/latest";
 let nextProcess;
+let updateState = {
+  state: "idle",
+  message: "Ready to check for updates.",
+  currentVersion: app.getVersion(),
+  supported: app.isPackaged,
+  releaseUrl: releasePageUrl,
+};
 
 protocol.registerSchemesAsPrivileged([
   {
@@ -99,6 +109,104 @@ function startNextServer() {
   nextProcess.unref();
 }
 
+function broadcastUpdateState() {
+  BrowserWindow.getAllWindows().forEach((window) => {
+    window.webContents.send("updates:state", updateState);
+  });
+}
+
+function setUpdateState(nextState) {
+  updateState = {
+    ...updateState,
+    ...nextState,
+    currentVersion: app.getVersion(),
+    supported: app.isPackaged,
+    releaseUrl: releasePageUrl,
+  };
+  broadcastUpdateState();
+}
+
+function configureUpdates() {
+  autoUpdater.autoDownload = false;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.setFeedURL({
+    provider: "github",
+    owner: "IshrakFaisal",
+    repo: "Productivity-Hub",
+  });
+
+  autoUpdater.on("checking-for-update", () => {
+    setUpdateState({ state: "checking", message: "Checking GitHub Releases for a newer installer." });
+  });
+
+  autoUpdater.on("update-available", (info) => {
+    setUpdateState({
+      state: "available",
+      message: `Version ${info.version} is ready to download.`,
+      version: info.version,
+    });
+  });
+
+  autoUpdater.on("update-not-available", () => {
+    setUpdateState({ state: "current", message: "You are running the latest available version." });
+  });
+
+  autoUpdater.on("download-progress", (progress) => {
+    setUpdateState({
+      state: "downloading",
+      message: `Downloading update: ${Math.round(progress.percent)}%.`,
+      progress: Math.round(progress.percent),
+    });
+  });
+
+  autoUpdater.on("update-downloaded", (info) => {
+    setUpdateState({
+      state: "downloaded",
+      message: `Version ${info.version} downloaded. Restart to install it.`,
+      version: info.version,
+      progress: 100,
+    });
+  });
+
+  autoUpdater.on("error", (error) => {
+    setUpdateState({
+      state: "error",
+      message: error instanceof Error ? error.message : "Update check failed.",
+    });
+  });
+}
+
+function registerUpdateIpc() {
+  ipcMain.handle("updates:get-state", () => updateState);
+  ipcMain.handle("updates:check", async () => {
+    if (!app.isPackaged) {
+      setUpdateState({
+        state: "development",
+        message: "Update checks run from the installed app. Package and install Productivity Hub first.",
+      });
+      return updateState;
+    }
+
+    await autoUpdater.checkForUpdates();
+    return updateState;
+  });
+  ipcMain.handle("updates:download", async () => {
+    if (!app.isPackaged) return updateState;
+    await autoUpdater.downloadUpdate();
+    return updateState;
+  });
+  ipcMain.handle("updates:install", () => {
+    if (app.isPackaged) {
+      autoUpdater.quitAndInstall(false, true);
+    }
+  });
+  ipcMain.handle("app:open-external", (_event, url) => {
+    if (typeof url === "string" && /^https?:\/\//.test(url)) {
+      shell.openExternal(url);
+    }
+  });
+}
+
 async function waitForDevServer() {
   for (let attempt = 0; attempt < 60; attempt += 1) {
     try {
@@ -115,12 +223,12 @@ async function waitForDevServer() {
 async function getStartUrl() {
   if (await staticBuildExists()) {
     registerStaticProtocol();
-    return `${appOrigin}/`;
+    return `${appOrigin}/dashboard`;
   }
 
   startNextServer();
   await waitForDevServer();
-  return devUrl;
+  return `${devUrl}/dashboard`;
 }
 
 async function createWindow() {
@@ -138,6 +246,7 @@ async function createWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
+      preload: path.join(__dirname, "preload.cjs"),
       sandbox: true,
     },
   });
@@ -164,6 +273,9 @@ async function createWindow() {
   await window.loadURL(startUrl);
 
 }
+
+configureUpdates();
+registerUpdateIpc();
 
 app.whenReady().then(createWindow);
 

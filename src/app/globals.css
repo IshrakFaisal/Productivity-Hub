@@ -1,8 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #08090c;
-  --foreground: #f7f7f4;
+  --background: #07080a;
+  --foreground: #f5f7fa;
+  --muted: #8a8f98;
+  --panel: rgba(255, 255, 255, 0.045);
+  --panel-strong: rgba(255, 255, 255, 0.07);
+  --line: rgba(255, 255, 255, 0.1);
+  --accent: #d7ff6b;
+  --accent-blue: #7dd3fc;
 }
 
 @theme inline {
@@ -16,6 +22,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  text-rendering: geometricPrecision;
 }
 
 button,
@@ -25,7 +32,7 @@ select {
 }
 
 ::selection {
-  background: #d7ff6b;
+  background: var(--accent);
   color: #08090c;
 }
 
@@ -34,4 +41,47 @@ button,
 input,
 select {
   -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body::before {
+  pointer-events: none;
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 72%);
+}
+
+body::after {
+  pointer-events: none;
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 18% -10%, rgba(215, 255, 107, 0.14), transparent 28%),
+    radial-gradient(circle at 86% 0%, rgba(125, 211, 252, 0.12), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 34%);
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #08090c;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border: 3px solid #08090c;
+  border-radius: 999px;
 }

@@ -26,14 +26,26 @@ export type ProductivityTool = {
   notesScore: number;
   calendarScore: number;
   knowledgeScore: number;
+  setupDifficulty: "Low" | "Medium" | "High";
+  learningCurve: "Easy" | "Moderate" | "Steep";
+  dataOwnership: string;
+  privacyNotes: string;
+  lockInRisk: "Low" | "Medium" | "High";
+  migrationDifficulty: "Easy" | "Moderate" | "Hard";
+  chooseIf: string[];
+  avoidIf: string[];
 };
 
-type ToolInput = Omit<ProductivityTool, "id" | "description" | "notIdealFor" | "platforms" | "strengths" | "weaknesses" | "suggestedPairings" | "alternatives"> &
-  Partial<Pick<ProductivityTool, "description" | "notIdealFor" | "platforms" | "strengths" | "weaknesses" | "suggestedPairings" | "alternatives">>;
+type ToolInput = Omit<ProductivityTool, "id" | "description" | "notIdealFor" | "platforms" | "strengths" | "weaknesses" | "suggestedPairings" | "alternatives" | "setupDifficulty" | "learningCurve" | "dataOwnership" | "privacyNotes" | "lockInRisk" | "migrationDifficulty" | "chooseIf" | "avoidIf"> &
+  Partial<Pick<ProductivityTool, "description" | "notIdealFor" | "platforms" | "strengths" | "weaknesses" | "suggestedPairings" | "alternatives" | "setupDifficulty" | "learningCurve" | "dataOwnership" | "privacyNotes" | "lockInRisk" | "migrationDifficulty" | "chooseIf" | "avoidIf">>;
 
 const slug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 function tool(input: ToolInput): ProductivityTool {
+  const setupDifficulty = input.setupDifficulty ?? (input.powerScore >= 9 || input.categories.includes("Automation") ? "High" : input.simplicityScore >= 8 ? "Low" : "Medium");
+  const learningCurve = input.learningCurve ?? (setupDifficulty === "High" ? "Steep" : setupDifficulty === "Low" ? "Easy" : "Moderate");
+  const lockInRisk = input.lockInRisk ?? (input.mainAppScore >= 8 || input.categories.includes("Docs") ? "Medium" : "Low");
+
   return {
     description: input.description ?? `${input.name} is ${input.tagline.toLowerCase()} It fits ${input.bestFor.slice(0, 3).join(", ").toLowerCase()} workflows best.`,
     notIdealFor: input.notIdealFor ?? ["People who need a very different operating model", "Teams unwilling to define clear workflow ownership"],
@@ -42,6 +54,14 @@ function tool(input: ToolInput): ProductivityTool {
     weaknesses: input.weaknesses ?? ["Requires workflow discipline", "Can overlap with adjacent tools", "Advanced use takes setup"],
     suggestedPairings: input.suggestedPairings ?? ["Google Workspace", "Slack", "Todoist"],
     alternatives: input.alternatives ?? [],
+    setupDifficulty,
+    learningCurve,
+    dataOwnership: input.dataOwnership ?? (input.worksOffline ? "Local or offline-capable data paths are available, but export quality depends on the workflow." : "Cloud-first data storage with exports or API access depending on the plan."),
+    privacyNotes: input.privacyNotes ?? (input.worksOffline ? "Stronger offline posture than most cloud-first tools; review sync settings before storing sensitive work." : "Cloud-first product. Review workspace permissions, AI settings, and retention policies before team rollout."),
+    lockInRisk,
+    migrationDifficulty: input.migrationDifficulty ?? (lockInRisk === "High" ? "Hard" : input.mainAppScore >= 8 ? "Moderate" : "Easy"),
+    chooseIf: input.chooseIf ?? [`You want ${input.name} to own its clearest category lane.`, `Your work matches ${input.bestFor.slice(0, 2).join(" or ").toLowerCase()} workflows.`, "You are willing to define clear boundaries with adjacent apps."],
+    avoidIf: input.avoidIf ?? ["You need a very different interface style.", "You cannot tolerate overlap with existing tools.", "You need every workflow to be solved by one app immediately."],
     ...input,
     id: slug(input.name),
   };
