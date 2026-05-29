@@ -46,7 +46,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const currentItem = [...navItems, ...utilityItems].find((item) => isActive(pathname, item.href)) ?? navItems[0];
 
   return (
-    <div className="min-h-screen bg-[#07080a] text-white md:grid md:grid-cols-[248px_minmax(0,1fr)]">
+    <div className="min-h-screen overflow-x-hidden bg-[#07080a] text-white md:grid md:grid-cols-[248px_minmax(0,1fr)]">
       <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
       <aside className="hidden h-screen border-r border-white/10 bg-[#090a0d]/92 md:sticky md:top-0 md:flex md:flex-col">
         <div className="flex h-16 items-center gap-3 border-b border-white/10 px-4">
@@ -86,7 +86,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <div className="min-w-0">
+      <div className="min-w-0 overflow-x-hidden">
         <header className="sticky top-0 z-40 border-b border-white/10 bg-[#07080a]/86 backdrop-blur-2xl">
           <div className="hidden h-16 items-center justify-between gap-4 px-5 md:flex">
             <div className="min-w-0">
@@ -132,7 +132,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main className="min-w-0">{children}</main>
+        <main className="min-w-0 overflow-x-hidden">{children}</main>
       </div>
     </div>
   );

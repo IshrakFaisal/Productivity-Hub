@@ -182,7 +182,7 @@ export function StackBuilder() {
         </Card>
       </div>
 
-      <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+      <div className="space-y-6 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:self-start lg:overflow-y-auto lg:pr-1">
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
