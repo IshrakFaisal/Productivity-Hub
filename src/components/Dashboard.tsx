@@ -84,7 +84,7 @@ export function Dashboard() {
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-4">
-        <Metric title="Favorites" value={state.favorites.length} detail="Tools you marked as worth revisiting" />
+        <Metric title="Library items" value={state.favorites.length + state.savedCollections.length + state.savedGuides.length + state.savedStacks.length} detail="Saved tools, guides, collections, and stacks" />
         <Metric title="Saved stacks" value={state.savedStacks.length} detail="Local stack snapshots on this device" />
         <Metric title="Best score" value={strongestStack?.score ?? 0} detail={strongestStack?.name ?? "Build a stack to score it"} />
         <Metric title="Quiz home base" value={quizHomeBase?.mainAppScore ?? 0} detail={quizHomeBase?.name ?? "Run the stack finder"} />

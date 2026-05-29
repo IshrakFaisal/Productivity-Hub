@@ -3,6 +3,7 @@ import { ArrowRight, Layers3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { SaveToLibraryButton } from "@/components/SaveToLibraryButton";
 import { ToolLogo } from "@/components/ToolLogo";
 import { productivityTools } from "@/data/productivityTools";
 import { type TemplateCollection } from "@/data/collections";
@@ -48,6 +49,7 @@ export function CollectionCard({ collection }: { collection: TemplateCollection 
             <Layers3 className="h-4 w-4" />
             Use template
           </ButtonLink>
+          <SaveToLibraryButton target={{ type: "collection", id: collection.id, name: collection.name }} className="flex-1" />
           <ButtonLink href={`/collections/${collection.id}`} variant="secondary" className="flex-1">
             View details
             <ArrowRight className="h-4 w-4" />

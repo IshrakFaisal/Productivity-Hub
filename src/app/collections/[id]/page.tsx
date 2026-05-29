@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, GitCompare, Layers3, Sparkles } from "lucide-rea
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { SaveToLibraryButton } from "@/components/SaveToLibraryButton";
 import { ScoreBar } from "@/components/ScoreBar";
 import { ToolLogo } from "@/components/ToolLogo";
 import { getTemplateCollectionById, templateCollections } from "@/data/collections";
@@ -50,6 +51,7 @@ export default async function CollectionDetailPage({ params }: { params: Promise
               <Layers3 className="h-4 w-4" />
               Use this template
             </ButtonLink>
+            <SaveToLibraryButton target={{ type: "collection", id: collection.id, name: collection.name }} />
             <ButtonLink href={compareHref} variant="secondary">
               <GitCompare className="h-4 w-4" />
               Compare included tools

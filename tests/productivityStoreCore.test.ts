@@ -5,6 +5,8 @@ import { normalizeImportedState } from "../src/lib/productivityStoreCore";
 test("normalizes imported workspace data and drops unsafe values", () => {
   const state = normalizeImportedState({
     favorites: ["notion", 42, "todoist"],
+    savedCollections: ["student-research", null, "creator-studio"],
+    savedGuides: ["best-task-managers", false],
     recentToolIds: ["linear", false],
     savedStacks: [
       {
@@ -25,6 +27,8 @@ test("normalizes imported workspace data and drops unsafe values", () => {
   });
 
   assert.deepEqual(state.favorites, ["notion", "todoist"]);
+  assert.deepEqual(state.savedCollections, ["student-research", "creator-studio"]);
+  assert.deepEqual(state.savedGuides, ["best-task-managers"]);
   assert.deepEqual(state.recentToolIds, ["linear"]);
   assert.equal(state.savedStacks.length, 1);
   assert.equal(state.savedStacks[0].id, "123");

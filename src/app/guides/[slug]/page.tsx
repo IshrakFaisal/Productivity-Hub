@@ -5,6 +5,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { GuideHero } from "@/components/GuideHero";
 import { GuideSection } from "@/components/GuideSection";
+import { SaveToLibraryButton } from "@/components/SaveToLibraryButton";
 import { getGuideBySlug, guides } from "@/data/guides";
 
 export function generateStaticParams() {
@@ -47,6 +48,10 @@ export default async function GuideDetailPage({ params }: { params: Promise<{ sl
         </aside>
 
         <article className="space-y-6">
+          <div className="flex justify-end">
+            <SaveToLibraryButton target={{ type: "guide", id: guide.slug, name: guide.title }} />
+          </div>
+
           {guide.sections.map((section, index) => (
             <GuideSection key={section.id} section={section} index={index} />
           ))}

@@ -12,6 +12,7 @@ import {
   Layers3,
   LayoutDashboard,
   Library,
+  LibraryBig,
   Menu,
   PanelsTopLeft,
   Search,
@@ -24,6 +25,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/library", label: "My Library", icon: LibraryBig },
   { href: "/tools", label: "Directory", icon: Library },
   { href: "/collections", label: "Collections", icon: PanelsTopLeft },
   { href: "/guides", label: "Guides", icon: BookOpenText },

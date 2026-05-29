@@ -12,6 +12,7 @@ import {
   Layers3,
   LayoutDashboard,
   Library,
+  LibraryBig,
   PanelsTopLeft,
   RotateCcw,
   Search,
@@ -46,6 +47,15 @@ const navigationCommands: CommandItem[] = [
     keywords: "home workspace overview dashboard",
     icon: <LayoutDashboard className="h-4 w-4" />,
     href: "/dashboard",
+  },
+  {
+    id: "nav-library",
+    title: "Open My Library",
+    subtitle: "Saved tools, guides, collections, and stacks",
+    section: "Navigation",
+    keywords: "library saved favorites bookmarks stacks collections guides",
+    icon: <LibraryBig className="h-4 w-4" />,
+    href: "/library",
   },
   {
     id: "nav-directory",
@@ -183,6 +193,15 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
     }));
 
     const workspaceCommands: CommandItem[] = [
+      {
+        id: "workspace-open-library",
+        title: "Open Saved Library",
+        subtitle: `${state.favorites.length + state.savedCollections.length + state.savedGuides.length + state.savedStacks.length} saved items on this device`,
+        section: "Workspace",
+        keywords: "library saved bookmarks favorites collections guides stacks",
+        icon: <LibraryBig className="h-4 w-4" />,
+        href: "/library",
+      },
       {
         id: "workspace-export",
         title: "Export Workspace JSON",

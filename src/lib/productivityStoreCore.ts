@@ -26,6 +26,8 @@ export type OnboardingProfile = {
 
 export type ProductivityHubState = {
   favorites: string[];
+  savedCollections: string[];
+  savedGuides: string[];
   savedStacks: SavedStack[];
   recentToolIds: string[];
   onboarding?: OnboardingProfile;
@@ -34,6 +36,8 @@ export type ProductivityHubState = {
 
 export const initialProductivityHubState: ProductivityHubState = {
   favorites: [],
+  savedCollections: [],
+  savedGuides: [],
   savedStacks: [],
   recentToolIds: [],
 };
@@ -46,6 +50,8 @@ export function normalizeImportedState(value: unknown): ProductivityHubState {
   const candidate = value as Partial<ProductivityHubState>;
   return {
     favorites: Array.isArray(candidate.favorites) ? candidate.favorites.filter(isString) : [],
+    savedCollections: Array.isArray(candidate.savedCollections) ? candidate.savedCollections.filter(isString) : [],
+    savedGuides: Array.isArray(candidate.savedGuides) ? candidate.savedGuides.filter(isString) : [],
     savedStacks: Array.isArray(candidate.savedStacks)
       ? candidate.savedStacks
           .filter((stack): stack is SavedStack => Boolean(stack && typeof stack === "object" && "id" in stack && "name" in stack && "toolIds" in stack))

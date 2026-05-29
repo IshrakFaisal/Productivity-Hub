@@ -83,6 +83,30 @@ export function useProductivityHubStore() {
     [update],
   );
 
+  const toggleSavedCollection = useCallback(
+    (collectionId: string) => {
+      update((current) => ({
+        ...current,
+        savedCollections: current.savedCollections.includes(collectionId)
+          ? current.savedCollections.filter((id) => id !== collectionId)
+          : unique([collectionId, ...current.savedCollections]),
+      }));
+    },
+    [update],
+  );
+
+  const toggleSavedGuide = useCallback(
+    (guideSlug: string) => {
+      update((current) => ({
+        ...current,
+        savedGuides: current.savedGuides.includes(guideSlug)
+          ? current.savedGuides.filter((slug) => slug !== guideSlug)
+          : unique([guideSlug, ...current.savedGuides]),
+      }));
+    },
+    [update],
+  );
+
   const trackTool = useCallback(
     (toolId: string) => {
       update((current) => ({
@@ -165,10 +189,12 @@ export function useProductivityHubStore() {
       saveOnboarding,
       saveQuizResult,
       saveStack,
+      toggleSavedCollection,
+      toggleSavedGuide,
       toggleFavorite,
       trackTool,
     }),
-    [deleteStack, importWorkspace, resetWorkspace, saveOnboarding, saveQuizResult, saveStack, state, toggleFavorite, trackTool],
+    [deleteStack, importWorkspace, resetWorkspace, saveOnboarding, saveQuizResult, saveStack, state, toggleFavorite, toggleSavedCollection, toggleSavedGuide, trackTool],
   );
 }
 
