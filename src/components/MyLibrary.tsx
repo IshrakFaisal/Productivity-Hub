@@ -1,16 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { Bookmark, BookOpenText, GitCompare, Heart, Layers3, Library, Trash2 } from "lucide-react";
+import type { ReactNode } from "react";
+import { Bookmark, BookOpenText, Download, GitCompare, Heart, Layers3, Library, Sparkles, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { ButtonLink } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { SaveToLibraryButton } from "@/components/SaveToLibraryButton";
 import { ToolLogo } from "@/components/ToolLogo";
 import { templateCollections } from "@/data/collections";
 import { guides } from "@/data/guides";
 import { getToolById, type ProductivityTool } from "@/data/productivityTools";
-import { useProductivityHubStore } from "@/lib/productivityStore";
+import { downloadTextFile, useProductivityHubStore } from "@/lib/productivityStore";
 
 export function MyLibrary() {
   const { state, deleteStack, toggleFavorite } = useProductivityHubStore();
@@ -22,6 +23,29 @@ export function MyLibrary() {
     .map((slug) => guides.find((guide) => guide.slug === slug))
     .filter((guide): guide is (typeof guides)[number] => Boolean(guide));
   const totalSaved = savedTools.length + savedCollections.length + savedGuides.length + state.savedStacks.length;
+  const bestCollection = [...savedCollections].sort((a, b) => b.score - a.score)[0];
+  const strongestStack = [...state.savedStacks].sort((a, b) => b.score - a.score)[0];
+  const compareIds = savedTools.length >= 2 ? savedTools.slice(0, 4).map((tool) => tool.id) : bestCollection?.toolIds.slice(0, 4) ?? [];
+  const compareHref = compareIds.length >= 2 ? `/compare?apps=${compareIds.join(",")}` : "/compare";
+  const readinessScore = Math.min(100, savedTools.length * 12 + savedCollections.length * 18 + savedGuides.length * 10 + state.savedStacks.length * 22);
+
+  function exportLibraryBrief() {
+    const lines = [
+      "Productivity Hub library brief",
+      `Generated: ${new Date().toLocaleString()}`,
+      "",
+      `Decision readiness: ${readinessScore}/100`,
+      `Saved tools: ${savedTools.map((tool) => tool.name).join(", ") || "None"}`,
+      `Saved collections: ${savedCollections.map((collection) => collection.name).join(", ") || "None"}`,
+      `Saved guides: ${savedGuides.map((guide) => guide.title).join(", ") || "None"}`,
+      `Saved stacks: ${state.savedStacks.map((stack) => `${stack.name} (${stack.score})`).join(", ") || "None"}`,
+      "",
+      "Recommended next move:",
+      getNextMove(savedTools.length, savedCollections.length, savedGuides.length, state.savedStacks.length),
+    ].join("\n");
+
+    downloadTextFile(`productivity-hub-library-${new Date().toISOString().slice(0, 10)}.txt`, lines);
+  }
 
   return (
     <div className="space-y-6">
@@ -62,6 +86,55 @@ export function MyLibrary() {
           </CardContent>
         </Card>
       ) : null}
+
+      <Card className="overflow-hidden">
+        <CardHeader className="bg-[linear-gradient(135deg,rgba(190,242,100,0.12),rgba(56,189,248,0.07),transparent)]">
+          <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div>
+              <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-white">
+                <Sparkles className="h-5 w-5 text-lime-200" />
+                Decision board
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-300">
+                A quick read on whether your saved research is ready to become a comparison, stack, or final shortlist.
+              </p>
+            </div>
+            <div className="grid h-20 w-20 place-items-center rounded-lg border border-lime-200/25 bg-lime-200/10">
+              <span className="text-2xl font-semibold text-lime-100">{readinessScore}</span>
+              <span className="-mt-5 text-[10px] uppercase tracking-wide text-neutral-500">ready</span>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-4 pt-5 md:grid-cols-3">
+          <DecisionAction
+            title="Compare shortlist"
+            body={compareIds.length >= 2 ? "Open a focused comparison from saved tools or your best saved collection." : "Save at least two tools or one collection to unlock a focused comparison."}
+            href={compareHref}
+            label="Compare"
+            icon={<GitCompare className="h-4 w-4" />}
+          />
+          <DecisionAction
+            title="Open best template"
+            body={bestCollection ? `${bestCollection.name} is your strongest saved collection at ${bestCollection.score}/100.` : "Save a collection to create a reusable starting point for Stack Builder."}
+            href={bestCollection ? `/collections/${bestCollection.id}` : "/collections"}
+            label={bestCollection ? "Open collection" : "Browse collections"}
+            icon={<Bookmark className="h-4 w-4" />}
+          />
+          <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-white">
+              <Download className="h-4 w-4 text-lime-200" />
+              Export brief
+            </div>
+            <p className="mt-2 text-sm leading-6 text-neutral-400">
+              Download a plain-text summary of saved tools, collections, guides, stacks, and the next recommended move.
+            </p>
+            <Button type="button" variant="secondary" className="mt-4 w-full" onClick={exportLibraryBrief} disabled={totalSaved === 0}>
+              <Download className="h-4 w-4" />
+              Export
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <section className="grid gap-6 xl:grid-cols-2">
         <Card>
@@ -215,6 +288,7 @@ export function MyLibrary() {
           <div>
             <h2 className="text-3xl font-semibold tracking-tight text-white">Turn your library into a decision.</h2>
             <p className="mt-3 max-w-2xl text-neutral-300">Compare saved tools, load a saved collection, or use Stack Builder to reduce overlap before committing to a workflow.</p>
+            {strongestStack ? <p className="mt-2 text-sm text-lime-100">Your strongest saved stack is {strongestStack.name} at {strongestStack.score}/100.</p> : null}
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
             <ButtonLink href="/compare">
@@ -228,6 +302,33 @@ export function MyLibrary() {
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+function DecisionAction({
+  title,
+  body,
+  href,
+  label,
+  icon,
+}: {
+  title: string;
+  body: string;
+  href: string;
+  label: string;
+  icon: ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
+      <div className="flex items-center gap-2 text-sm font-semibold text-white">
+        <span className="text-lime-200">{icon}</span>
+        {title}
+      </div>
+      <p className="mt-2 text-sm leading-6 text-neutral-400">{body}</p>
+      <ButtonLink href={href} variant="secondary" className="mt-4 w-full">
+        {label}
+      </ButtonLink>
     </div>
   );
 }
@@ -254,4 +355,12 @@ function LibraryEmpty({ body, href, label }: { body: string; href: string; label
 
 function isTool(tool: ProductivityTool | undefined): tool is ProductivityTool {
   return Boolean(tool);
+}
+
+function getNextMove(toolCount: number, collectionCount: number, guideCount: number, stackCount: number) {
+  if (stackCount > 0) return "Open your strongest saved stack and remove any duplicate task, calendar, or notes apps.";
+  if (toolCount >= 2) return "Compare your saved tools side by side and pick one home base candidate.";
+  if (collectionCount > 0) return "Open your strongest saved collection, then load it into Stack Builder.";
+  if (guideCount > 0) return "Turn the guide you saved into a shortlist by saving two or three mentioned tools.";
+  return "Start by saving a collection or favoriting two tools from the directory.";
 }
